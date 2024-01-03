@@ -10,6 +10,10 @@ public class ProjectileShooter : MonoBehaviour
     public float shotDelay = 0.5f;  // Delay between shots in seconds.
     public string shootAnimationName = "Shoot";  // The name of the shoot animation in the Animator.
 
+    // New fields for object instantiation
+    public GameObject[] objectsToInstantiate; // Objects to randomly instantiate when fired.
+    public float instantiationDuration = 2.0f; // Duration for which the instantiated object exists.
+
     private float nextFireTime;
     private Animator animator;
 
@@ -59,6 +63,19 @@ public class ProjectileShooter : MonoBehaviour
         else
         {
             Debug.LogError("ProjectilePrefab must have a Rigidbody component.");
+        }
+
+        // Randomly instantiate an object from the array
+        if (objectsToInstantiate.Length > 0)
+        {
+            GameObject objectToInstantiate = objectsToInstantiate[Random.Range(0, objectsToInstantiate.Length)];
+            if (objectToInstantiate != null)
+            {
+                GameObject instantiatedObject = Instantiate(objectToInstantiate, firePoint.position, firePoint.rotation);
+
+                // Destroy the instantiated object after the specified duration
+                Destroy(instantiatedObject, instantiationDuration);
+            }
         }
     }
 }
