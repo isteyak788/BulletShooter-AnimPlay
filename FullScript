@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ProjectileShooter : MonoBehaviour
@@ -7,23 +9,10 @@ public class ProjectileShooter : MonoBehaviour
     public float speed = 10.0f;  // Speed of the projectile.
     public bool continuousFire = false;  // Toggle for continuous fire.
     public float continuousFireRate = 5.0f;  // Bullets per second for continuous fire.
-    public float shotDelay = 0.5f;  // Delay between shots in seconds.
-    public string shootAnimationName = "Shoot";  // The name of the shoot animation in the Animator.
-
-    // New fields for object instantiation
-    public GameObject[] objectsToInstantiate; // Objects to randomly instantiate when fired.
-    public float instantiationDuration = 2.0f; // Duration for which the instantiated object exists.
 
     private float nextFireTime;
-    private Animator animator;
 
-    void Start()
-    {
-        // Get the Animator component attached to the GameObject
-        animator = GetComponent<Animator>();
-    }
-
-    void Update()
+    private void Update()
     {
         if (continuousFire)
         {
@@ -35,23 +24,15 @@ public class ProjectileShooter : MonoBehaviour
         }
         else
         {
-            if (Input.GetButtonDown("Fire1") && Time.time >= nextFireTime)
+            if (Input.GetButtonDown("Fire1"))
             {
                 Shoot();
-                nextFireTime = Time.time + shotDelay;
             }
         }
     }
 
-    void Shoot()
+    private void Shoot()
     {
-        // Play the shoot animation directly
-        if (animator != null)
-        {
-            animator.Play(shootAnimationName);
-        }
-
-        // Instantiate the projectile
         GameObject newProjectile = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
         Rigidbody rb = newProjectile.GetComponent<Rigidbody>();
 
@@ -63,19 +44,6 @@ public class ProjectileShooter : MonoBehaviour
         else
         {
             Debug.LogError("ProjectilePrefab must have a Rigidbody component.");
-        }
-
-        // Randomly instantiate an object from the array
-        if (objectsToInstantiate.Length > 0)
-        {
-            GameObject objectToInstantiate = objectsToInstantiate[Random.Range(0, objectsToInstantiate.Length)];
-            if (objectToInstantiate != null)
-            {
-                GameObject instantiatedObject = Instantiate(objectToInstantiate, firePoint.position, firePoint.rotation);
-
-                // Destroy the instantiated object after the specified duration
-                Destroy(instantiatedObject, instantiationDuration);
-            }
         }
     }
 }
