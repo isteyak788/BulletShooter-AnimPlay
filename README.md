@@ -1,2 +1,1 @@
-# BulletShooter-AnimPlay
-A simple projectile shooter (spawner) with despawner and (Fire) Animation play when shooting
+this script makes an object shoot projectiles with some cool effects when the player clicks the left and/or right mouse buttons. It includes options for continuous shooting and visual effects like muzzle flashes and animations.
