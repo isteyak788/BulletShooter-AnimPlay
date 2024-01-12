@@ -2,63 +2,78 @@ using UnityEngine;
 
 public class ProjectileShooter : MonoBehaviour
 {
-    public GameObject projectilePrefab;  // The projectile prefab you want to shoot.
-    public Transform firePoint;  // The position from which the projectile will be fired.
-    public float speed = 10.0f;  // Speed of the projectile.
-    public bool continuousFire = false;  // Toggle for continuous fire.
-    public float continuousFireRate = 5.0f;  // Bullets per second for continuous fire.
-    public float shotDelay = 0.5f;  // Delay between shots in seconds.
-    public string shootAnimationName = "Shoot";  // The name of the shoot animation in the Animator.
+    public GameObject projectilePrefab;
+    public Transform firePoint;
+    public float speed = 10.0f;
+    public bool continuousFire = false;
+    public float continuousFireRate = 5.0f;
+    public float shotDelay = 0.5f;
+    public string shootAnimationName = "Shoot";
+
+    public GameObject[] muzzleFlashObjects;
+    public float muzzleFlashDuration = 1.0f;
+
+    [Header("Right button settings")] 
+    public bool rightMouseEnabled = true;
+    public float rightMouseSpeed = 15.0f;
+    public bool rightMouseContinuousFire = false;
+    public float rightMouseContinuousFireRate = 7.0f;
+    public GameObject[] rightMouseMuzzleFlashObjects;
+    public float rightMouseMuzzleFlashDuration = 1.5f;
 
     private float nextFireTime;
     private Animator animator;
 
     void Start()
     {
-        // Get the Animator component attached to the GameObject
         animator = GetComponent<Animator>();
     }
 
     void Update()
     {
-        if (continuousFire)
+        if (continuousFire && Input.GetButton("Fire1") && Time.time >= nextFireTime)
         {
-            if (Input.GetButton("Fire1") && Time.time >= nextFireTime)
-            {
-                Shoot();
-                nextFireTime = Time.time + 1.0f / continuousFireRate;
-            }
+            Shoot(speed, muzzleFlashObjects, muzzleFlashDuration);
+            nextFireTime = Time.time + 1.0f / continuousFireRate;
         }
-        else
+
+        if (rightMouseEnabled && rightMouseContinuousFire && Input.GetButton("Fire2") && Time.time >= nextFireTime)
         {
-            if (Input.GetButtonDown("Fire1") && Time.time >= nextFireTime)
-            {
-                Shoot();
-                nextFireTime = Time.time + shotDelay;
-            }
+            Shoot(rightMouseSpeed, rightMouseMuzzleFlashObjects, rightMouseMuzzleFlashDuration);
+            nextFireTime = Time.time + 1.0f / rightMouseContinuousFireRate;
+        }
+        else if (rightMouseEnabled && Input.GetButtonDown("Fire2") && Time.time >= nextFireTime)
+        {
+            Shoot(rightMouseSpeed, rightMouseMuzzleFlashObjects, rightMouseMuzzleFlashDuration);
+            nextFireTime = Time.time + shotDelay;
         }
     }
 
-    void Shoot()
+    void Shoot(float currentSpeed, GameObject[] currentMuzzleFlashObjects, float currentMuzzleFlashDuration)
     {
-        // Play the shoot animation directly
         if (animator != null)
         {
             animator.Play(shootAnimationName);
         }
 
-        // Instantiate the projectile
         GameObject newProjectile = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
         Rigidbody rb = newProjectile.GetComponent<Rigidbody>();
 
         if (rb != null)
         {
-            // Adjust the projectile's velocity based on the speed parameter.
-            rb.velocity = firePoint.forward * speed;
+            rb.velocity = firePoint.forward * currentSpeed;
         }
         else
         {
             Debug.LogError("ProjectilePrefab must have a Rigidbody component.");
+        }
+
+        if (currentMuzzleFlashObjects.Length > 0)
+        {
+            int randomIndex = Random.Range(0, currentMuzzleFlashObjects.Length);
+            GameObject muzzleFlash = Instantiate(currentMuzzleFlashObjects[randomIndex], firePoint.position, firePoint.rotation);
+
+            Destroy(muzzleFlash, currentMuzzleFlashDuration);
         }
     }
 }
